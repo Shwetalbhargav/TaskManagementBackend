@@ -6,14 +6,51 @@ const router = express.Router();
 
 //Create Task(manager or admin)
 router.post('/', isAuthenticated, hasRole(['manager', 'admin']), async(req,res) => {
-    const task = new Task({...req.body, createdBy: req.session.userId});
+    const {assignedTo, ...taskData}= req.body;
+    const task = new Task({
+        ...taskData,
+        createdBy: req.session.userId,
+        assignedTo: assignedTo || null
+    });
+
     await task.save();
+
+    if(assignedTo){
+        console.log(`🔔 Task assigned to user ID: ${assignedTo}`);
+    }
     res.json(task);
 });
 
-//Get All Task(All  authenticated users)
+//Get All Task with filters(All  authenticated users)
 router.get('/', isAuthenticated, async(req, res) =>{
-    const tasks = await Task.find();
+    const {title, createdBy,priority, status, dueDateFrom, dueDateTo} = req.body;
+
+    const query = {};
+
+    if(title){
+        query.title = {$regex:title, $options:'i'};
+    }
+    if(createdBy){
+        query.createdBy;
+    }
+    if(priority){
+        query.priority;
+    }
+    if(status){
+        query.status;
+    }
+
+    if(dueDateFrom || dueDateTo){
+        query.dueDate = {};
+        if(dueDateFrom){
+            query.dueDate.$gte = new Date(dueDateFrom);
+        }
+        if(dueDateTo){
+            query.dueDate.$lt = new Date(dueDateTo);
+        }
+    }
+
+    const tasks = await Task.find(query).populate('createdBy assignedTo', 'username');
     res.json(tasks);
 });
 
@@ -35,6 +72,28 @@ router.put('/:id', isAuthenticated, async(req, res) =>{
 router.delete('/:id', isAuthenticated, hasRole(['manager', 'admin']), async(req,res) => {
     await Task.findByIdAndDelete(req.params.id);
     res.json({message: "Deleted!!"})
+});
+
+//Dashboard:tasks created by, assigned to, and overdue status
+router.get('/dashboard', isAuthenticated, async(req, res) =>{
+    const userId = req.session.userId;
+    const now = new Date();
+
+    const [createdTasks, assignedTasks, overdueTasks] = await Promise.all([
+        Task.find({createdBy:userId}),
+        Task.find({assignedTo:userId}),
+        Task.find({
+            assignedTo:userId,
+            dueDate:{$lt: now},
+            status: {$ne: "completed"}
+        })
+    ]);
+
+    res.json({
+        createdTasks,
+        assignedTasks,
+        overdueTasks
+    });
 });
 
 export default router;
