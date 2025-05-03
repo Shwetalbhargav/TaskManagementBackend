@@ -13,7 +13,7 @@ const taskSchema = new mongoose.Schema({
         enum: ['inProgress', 'completed','discarded', 'pending']
     },
     createdBy: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
-    assignedTo: {type: mongoose.Schema.Types.ObjectId, ref: 'User'}
+    assignedTo: [{type: mongoose.Schema.Types.ObjectId, ref: 'Team'}]
 });
 
 export default mongoose.model('Task', taskSchema);

@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 
 import authRoutes from "./routes/auth.js";
 import tasksRoutes from "./routes/tasks.js";
+import notificationRoutes from "./routes/notification.js";
 
 dotenv.config();
 const app =express();
@@ -23,6 +24,7 @@ app.use(session({
 //Routes
 app.use('/auth', authRoutes);
 app.use('/tasks', tasksRoutes);
+app.use('/notification', notificationRoutes)
 
 //DB Connection and start server
 mongoose.connect(process.env.MONGO_URI)

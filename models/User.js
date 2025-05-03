@@ -16,8 +16,15 @@ const userSchema = new mongoose.Schema({
         }
     },
     
-    role: {type: String , enum: ['admin', 'manager','user']}
+    role: {type: String , enum: ['admin', 'manager','user']},
+
+    teams: [{
+        teamId: {type: mongoose.Schema.Types.ObjectId, ref: 'Team'},
+        role: {type: String, enum:['Team Leader', 'member']}
+    }]
 });
+
+
 
 export default mongoose.model('User', userSchema)
 

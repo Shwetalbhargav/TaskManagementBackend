@@ -10,7 +10,7 @@ router.post('/', isAuthenticated, hasRole(['manager', 'admin']), async(req,res) 
     const task = new Task({
         ...taskData,
         createdBy: req.session.userId,
-        assignedTo: assignedTo || null
+        assignedTo: Array.isArray(assignedTo) ? assignedTo : [assignedTo]
     });
 
     await task.save();
