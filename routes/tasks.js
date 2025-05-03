@@ -1,6 +1,8 @@
 import express from "express";
 import Task from "../models/Task.js";
 import {isAuthenticated,hasRole} from "../middleware/authMiddleware.js";
+import sendNotification from "../utils/notifications.js";
+import { sendSocketNotifications } from "../index.js";
 
 const router = express.Router();
 
@@ -16,7 +18,15 @@ router.post('/', isAuthenticated, hasRole(['manager', 'admin']), async(req,res) 
     await task.save();
 
     if(assignedTo){
-        console.log(`🔔 Task assigned to user ID: ${assignedTo}`);
+       const assignedUsers = Array.isArray(assignedTo) ? assignedTo: [assignedTo];
+       for (const userId of assignedUsers){
+        await sendNotification(userId, `You have been assigned a new task: "${task.title}"`);
+        sendSocketNotifications(userId, `You have been assigned a new task: "${task.title}"`);
+
+        await sendNotification(leaderId, `You have been assigned as the Team Leader for ${team.name}`);
+        sendSocketNotification(leaderId, `You are now the Team Leader for ${team.name}`);
+
+       }
     }
     res.json(task);
 });

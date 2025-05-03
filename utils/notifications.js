@@ -2,16 +2,18 @@ import User from "../models/User";
 import Notification from "../models/Notification";
 
 export default async function sendNotification(userId, message) {
-    const user = await User.findById(userId);
+    const ids = Array.isArray(userId)? userId :[userId];
 
-    if(user){
+    for(let userId of ids){
+        const user = await User.findById(userId);
+        if(!user) continue;
         console.log(`🔔 Notification to ${user.username}: ${message}`);
-        const notification = new Notification({
-            user: userId,
-            message
+         
+        await Notification.create({
+            user: user._id,
+            message,
+            forRoles: roles.length > 0 ? roles : [user.role]
         });
-        await notification.save();
     }
-
     
 }
