@@ -21,7 +21,13 @@ const userSchema = new mongoose.Schema({
     teams: [{
         teamId: {type: mongoose.Schema.Types.ObjectId, ref: 'Team'},
         role: {type: String, enum:['Team Leader', 'member']}
-    }]
+    }],
+
+    notificationPreferences: {
+        email: {type: Boolean, default:true},
+        inApp: {type: Boolean, default: true},
+        mutedTypes: [String]
+    }
 });
 
 
