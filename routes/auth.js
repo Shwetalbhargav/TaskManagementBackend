@@ -1,5 +1,5 @@
 import express from "express";
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import User from "../models/User.js";
 import {logAction} from "../utils/Audit.js";
 
